@@ -9,6 +9,7 @@ import java.util.Map;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
@@ -51,7 +55,7 @@ public class EventActivity extends ListActivity {
 					List<String> list=new ArrayList<String>();
 					Gson gson = new Gson();
 					Log.i(CommonUtilities.TAG, jsonResult);
-					EventDTO[] events = gson.fromJson(jsonResult,
+					final EventDTO[] events = gson.fromJson(jsonResult,
 							EventDTO[].class);
 					for(EventDTO event:events){
 						Log.d(CommonUtilities.TAG,event.event_name);
@@ -59,6 +63,28 @@ public class EventActivity extends ListActivity {
 					}
 					
 					setListAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, list.toArray(new String[list.size()])));
+					getListView().setOnItemClickListener(new OnItemClickListener() {
+
+						@Override
+						public void onItemClick(AdapterView<?> arg0, View arg1,
+								final int position, long arg3) {
+							AsyncTask<Void, Void, Void> poster=new AsyncTask<Void, Void, Void>(){
+
+								@Override
+								protected Void doInBackground(Void... p) {
+									Log.i(CommonUtilities.TAG,"Joining to event pos "+position+" "+events[position].event_name);
+									Intent intent=new Intent(EventActivity.this,UsersInEventActivity.class);
+									intent.putExtra("event_name", events[position].event_name);
+									startActivity(intent);
+									
+									return null;
+								}
+								
+							};
+							poster.execute();
+						}
+						
+					});
 					
 				};
 			};
